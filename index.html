@@ -1,1 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>FIT GUIDE AI · 헬스 기구 추천</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app" id="app">
 
+  <header class="header" id="header">
+    <button class="icon-btn" id="backBtn" hidden aria-label="뒤로" onclick="goBack()">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="brand" id="brand"><i>F</i>FIT GUIDE <span>AI</span></div>
+    <div class="title" id="hTitle" hidden></div>
+    <button class="icon-btn right" id="homeBtn" hidden aria-label="처음으로" onclick="go('s1')">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11h14V9"/></svg></button>
+  </header>
+
+  <main class="screens">
+
+    <!-- S-01 메인 -->
+    <section class="screen active" id="s1" data-title="">
+      <div class="hero">
+        <span class="eyebrow">헬스 초보를 위한 기구 안내</span>
+        <h1>오늘은 어디를<br>운동할까요?</h1>
+        <p>운동 부위만 고르면 맞는 헬스 기구와 기본 사용법을 알려드려요.</p>
+        <div class="fig" data-fig="전체"></div>
+      </div>
+      <button class="btn btn-primary" onclick="go('s2')">운동 부위 고르기
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+
+      <div class="section-title">바로 고르기 <small>부위를 누르면 바로 이동해요</small></div>
+      <div class="parts-preview" id="quickParts"></div>
+
+      <div class="section-title">이렇게 사용해요</div>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><div><b>운동 부위 선택</b><span>가슴 · 등 · 어깨 · 하체 · 팔 · 유산소 중 하나</span></div></div>
+        <div class="step"><div class="n">2</div><div><b>AI 기구 추천</b><span>선택한 부위에 맞는 기구를 골라드려요</span></div></div>
+        <div class="step"><div class="n">3</div><div><b>사용법 확인</b><span>타깃 근육 · 시작 방법 · 주의할 점</span></div></div>
+      </div>
+      <p class="foot">기구 설명 출처: free-exercise-db (퍼블릭 도메인) 한국어 번역<br>처음 쓰는 기구는 트레이너에게 자세를 확인받으세요.</p>
+    </section>
+
+    <!-- S-02 운동 부위 선택 -->
+    <section class="screen" id="s2" data-title="운동 부위 선택">
+      <div class="progress"><i class="on"></i><i></i></div>
+      <h1>어느 부위를<br>운동할까요?</h1>
+      <p class="lead">한 부위를 골라 주세요. 다시 누르면 선택이 풀려요.</p>
+      <div class="part-grid" id="partGrid"></div>
+      <div class="selected-text" id="selText">아직 선택한 부위가 없어요.</div>
+      <div class="alert" id="alert" role="alert">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+        운동 부위를 먼저 선택해 주세요.</div>
+      <div class="bottom-cta">
+        <button class="btn btn-primary soft" id="recBtn" onclick="requestRecommend()">AI 기구 추천받기</button>
+      </div>
+    </section>
+
+    <!-- S-03 AI 추천 결과 -->
+    <section class="screen" id="s3" data-title="AI 추천 결과">
+      <div class="progress"><i class="on"></i><i class="on"></i></div>
+      <div class="result-head">
+        <div class="fig" id="resultFig"></div>
+        <div>
+          <span class="badge">● 예시 데이터</span>
+          <h2 id="resultTitle">가슴 운동 기구</h2>
+          <p id="resultDesc">추천 기구 3개</p>
+        </div>
+      </div>
+      <div class="notice">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
+        <span>지금 보이는 추천 결과는 화면 시연을 위한 <b>고정 예시 데이터</b>예요. 실제 AI 모델 결과가 아니에요.</span>
+      </div>
+      <div class="list" id="resultList"></div>
+      <div class="bottom-cta">
+        <div class="btn-row">
+          <button class="btn btn-line" onclick="go('s2')">다른 부위 보기</button>
+          <button class="btn btn-primary" onclick="go('s1')">처음으로</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <b id="loadingText">AI가 기구를 고르고 있어요</b>
+      <span>잠시만 기다려 주세요</span>
+    </div>
+  </main>
+
+  <!-- 하단 탭바 -->
+  <nav class="tabbar">
+    <button class="tab" onclick="showToast('계획표는 준비 중이에요')">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h3M8 17h6"/></svg>계획표</button>
+    <button class="tab active" onclick="go('s1')">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11h5v-6h4v6h5V9"/></svg>홈</button>
+    <button class="tab" onclick="showToast('마이페이지는 준비 중이에요')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>마이페이지</button>
+  </nav>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body></html>
