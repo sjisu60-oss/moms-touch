@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>머신메이트 · 헬스 기구 추천</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="header" id="header">
+    <button class="icon-btn" id="backBtn" hidden aria-label="뒤로" onclick="goBack()">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="brand" id="brand"><i>M</i>머신<span>메이트</span></div>
+    <div class="title" id="hTitle" hidden></div>
+    <button class="icon-btn right" id="homeBtn" hidden aria-label="홈으로" onclick="goTab('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11h14V9"/></svg></button>
+  </header>
+
+  <main class="screens">
+
+    <!-- 홈 -->
+    <section class="screen active" id="s1" data-title="">
+      <div class="hero">
+        <span class="eyebrow">헬스 초보를 위한 기구 메이트</span>
+        <h1>오늘은 어디를<br>운동할까요?</h1>
+        <p>운동 부위만 고르면 맞는 헬스 기구와 기본 사용법을 알려드려요.</p>
+        <div class="fig" data-fig="전체"></div>
+        <button class="hero-btn" onclick="go('s2')">운동 부위 고르기
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+
+      <div class="section-title">지금 인기 스케줄 <button class="more" onclick="goTab('share')">더 보기 ›</button></div>
+      <div class="popular" id="homePopular"></div>
+
+      <div class="section-title">이렇게 사용해요</div>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><div><b>운동 부위 선택</b><span>"운동 부위 고르기" 버튼 또는 하단 "부위별 추천" 탭에서 선택</span></div></div>
+        <div class="step"><div class="n">2</div><div><b>AI 기구 추천 확인</b><span>부위에 맞는 기구와 사용법 · 주의할 점 확인</span></div></div>
+        <div class="step"><div class="n">3</div><div><b>내 계획표에 담기</b><span>마음에 드는 기구를 요일별로 담고 마이페이지에서 관리</span></div></div>
+        <div class="step"><div class="n">4</div><div><b>스케줄 공유</b><span>인기 계획표에 좋아요를 누르고 내 계획표로 저장</span></div></div>
+      </div>
+      <p class="foot">기구 설명 출처: free-exercise-db (퍼블릭 도메인) 한국어 번역<br>처음 쓰는 기구는 트레이너에게 자세를 확인받으세요.</p>
+    </section>
+
+    <!-- 운동 부위 선택 -->
+    <section class="screen" id="s2" data-title="운동 부위 선택">
+      <div class="progress"><i class="on"></i><i></i></div>
+      <h1>어느 부위를<br>운동할까요?</h1>
+      <p class="lead">한 부위를 골라 주세요. 다시 누르면 선택이 풀려요.</p>
+      <div class="part-grid" id="partGrid"></div>
+      <div class="selected-text" id="selText">아직 선택한 부위가 없어요.</div>
+      <div class="alert" id="alert" role="alert">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+        운동 부위를 먼저 선택해 주세요.</div>
+      <div class="bottom-cta">
+        <button class="btn btn-primary soft" id="recBtn" onclick="requestRecommend()">AI 기구 추천받기</button>
+      </div>
+    </section>
+
+    <!-- AI 추천 결과 -->
+    <section class="screen" id="s3" data-title="AI 추천 결과">
+      <div class="progress"><i class="on"></i><i class="on"></i></div>
+      <div class="result-head">
+        <div class="fig" id="resultFig"></div>
+        <div>
+          <span class="badge">● 예시 데이터</span>
+          <h2 id="resultTitle">가슴 운동 기구</h2>
+          <p id="resultDesc">추천 기구 3개</p>
+        </div>
+      </div>
+      <div class="notice">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
+        <span>지금 보이는 추천 결과는 화면 시연을 위한 <b>고정 예시 데이터</b>예요. 실제 AI 모델 결과가 아니에요.</span>
+      </div>
+      <div class="list" id="resultList"></div>
+      <div class="bottom-cta">
+        <div class="btn-row">
+          <button class="btn btn-line" onclick="goTab('nav')">다른 부위 보기</button>
+          <button class="btn btn-primary" onclick="goTab('my')">내 계획표 보기</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 부위별 추천: 운동 부위를 누르면 바로 추천 결과 -->
+    <section class="screen" id="nav" data-title="부위별 추천">
+      <h1>어느 부위 기구를<br>추천받을까요?</h1>
+      <p class="lead">부위를 누르면 바로 AI 추천 결과를 보여드려요.</p>
+      <div class="nav-grid" id="navGrid"></div>
+    </section>
+
+    <!-- 스케줄 공유: 목록 -->
+    <section class="screen" id="share" data-title="스케줄 공유">
+      <h1>다른 사람의<br>운동 계획표</h1>
+      <p class="lead">마음에 드는 계획표에 좋아요를 누르고 내 계획표로 저장해 보세요.</p>
+      <div class="sort" id="shareSort">
+        <button data-sort="likes" class="on" onclick="setShareSort('likes')">인기순</button>
+        <button data-sort="new" onclick="setShareSort('new')">최신순</button>
+      </div>
+      <div class="share-list" id="shareList"></div>
+      <p class="demo-note">'예시 데이터' 표시가 있는 계획표는 화면 시연용으로 미리 넣어 둔 데이터예요.</p>
+    </section>
+
+    <!-- 스케줄 공유: 상세 -->
+    <section class="screen" id="shareDetail" data-title="공유된 계획표">
+      <div id="shareDetailBody"></div>
+      <div class="bottom-cta">
+        <button class="btn btn-primary" id="shareSaveBtn">내 계획표에 저장</button>
+      </div>
+    </section>
+
+    <!-- 로그인 -->
+    <section class="screen" id="login" data-title="로그인">
+      <div class="auth-head">
+        <div class="logo"><i>M</i></div>
+        <h1>머신메이트에<br>로그인하세요</h1>
+        <p class="lead">로그인하면 마이페이지에서 내 계획표를 관리하고 공유할 수 있어요.</p>
+      </div>
+      <div class="guest-note" id="loginGuestNote" hidden></div>
+      <form class="form" id="loginForm" onsubmit="submitLogin(event)" novalidate>
+        <div class="field"><label for="liEmail">이메일</label>
+          <input id="liEmail" type="email" autocomplete="username" placeholder="example@email.com"><p class="err"></p></div>
+        <div class="field"><label for="liPw">비밀번호</label>
+          <div class="pw-wrap"><input id="liPw" type="password" autocomplete="current-password" placeholder="비밀번호 입력">
+            <button type="button" class="pw-toggle" onclick="togglePw('liPw',this)">보기</button></div><p class="err"></p></div>
+        <p class="form-err" id="loginErr" role="alert"></p>
+        <button class="btn btn-primary" type="submit">로그인</button>
+      </form>
+      <p class="switch-auth">아직 계정이 없나요? <button onclick="go('signup')">회원가입</button></p>
+      <p class="demo-note">시연용 프로토타입이에요. 계정 정보는 서버가 아닌 이 브라우저에만 저장돼요.</p>
+    </section>
+
+    <!-- 회원가입 -->
+    <section class="screen" id="signup" data-title="회원가입">
+      <h1>회원가입</h1>
+      <p class="lead">간단한 정보만 입력하면 바로 시작할 수 있어요.</p>
+      <form class="form" id="signupForm" onsubmit="submitSignup(event)" novalidate>
+        <div class="field"><label for="suName">이름</label>
+          <input id="suName" type="text" autocomplete="nickname" placeholder="2~12자" maxlength="12"><p class="err"></p></div>
+        <div class="field"><label for="suEmail">이메일</label>
+          <input id="suEmail" type="email" autocomplete="email" placeholder="example@email.com"><p class="err"></p></div>
+        <div class="field"><label for="suPw">비밀번호</label>
+          <div class="pw-wrap"><input id="suPw" type="password" autocomplete="new-password" placeholder="영문 + 숫자 8자 이상">
+            <button type="button" class="pw-toggle" onclick="togglePw('suPw',this)">보기</button></div><p class="err"></p></div>
+        <div class="field"><label for="suPw2">비밀번호 확인</label>
+          <input id="suPw2" type="password" autocomplete="new-password" placeholder="비밀번호 다시 입력"><p class="err"></p></div>
+        <div class="field agree"><label class="check-line"><input id="suAgree" type="checkbox">
+          <span>(필수) 서비스 이용약관 및 개인정보 수집·이용에 동의합니다.</span></label><p class="err"></p></div>
+        <button class="btn btn-primary" type="submit">가입하기</button>
+      </form>
+      <p class="switch-auth">이미 계정이 있나요? <button onclick="go('login', true)">로그인</button></p>
+    </section>
+
+    <!-- 마이페이지 (계획표 포함) -->
+    <section class="screen" id="my" data-title="마이페이지">
+      <div class="profile" id="profile"></div>
+      <div class="stats" id="myStats"></div>
+
+      <div class="section-title">내 계획표 <small>요일을 눌러 확인해요</small></div>
+      <div class="week" id="weekStrip"></div>
+      <div class="plan-summary" id="planSummary"></div>
+      <div class="list" id="planList"></div>
+
+      <div class="section-title">계획표 공유</div>
+      <div class="share-setting">
+        <label class="switch-line">
+          <span><b>스케줄 공유에 내 계획표 올리기</b><small>다른 사람이 보고 좋아요를 누르거나 저장할 수 있어요.</small></span>
+          <input type="checkbox" class="switch" id="shareMine" onchange="toggleShareMine(this.checked)">
+        </label>
+        <div class="field" id="shareTitleWrap" hidden>
+          <label for="shareTitle">계획표 제목</label>
+          <input id="shareTitle" type="text" maxlength="30" onchange="updateShareSetting({title:this.value.trim()});showToast('제목을 저장했어요.')">
+          <label for="shareDesc" style="margin-top:10px">한 줄 소개 (선택)</label>
+          <input id="shareDesc" type="text" maxlength="60" placeholder="예) 초보용 주 3일 루틴이에요" onchange="updateShareSetting({desc:this.value.trim()});showToast('소개를 저장했어요.')">
+          <p class="err"></p>
+        </div>
+      </div>
+
+      <div class="menu">
+        <button class="menu-row" onclick="goTab('share')">스케줄 공유 둘러보기<span>›</span></button>
+        <button class="menu-row" onclick="logout()">로그아웃<span>›</span></button>
+        <button class="menu-row danger" id="deleteBtn" onclick="deleteAccount()">회원 탈퇴<span>›</span></button>
+      </div>
+      <p class="demo-note">시연용 프로토타입이에요. 계정 정보는 서버가 아닌 이 브라우저에만 저장돼요.</p>
+    </section>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <b id="loadingText">AI가 기구를 고르고 있어요</b>
+      <span>잠시만 기다려 주세요</span>
+    </div>
+
+    <!-- 데이터를 불러오지 못했을 때 -->
+    <div class="load-error" id="loadError" hidden>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+      <b>데이터를 불러오지 못했어요</b>
+      <p>data 폴더의 JSON 파일은 index.html을 더블클릭해서 열면 브라우저 보안 규칙 때문에 읽을 수 없어요.</p>
+      <ol>
+        <li>VS Code에서 이 폴더를 열어요.</li>
+        <li>확장 프로그램 <b>Live Server</b>를 설치해요.</li>
+        <li>index.html을 우클릭 → <b>Open with Live Server</b>를 눌러요.</li>
+      </ol>
+      <small id="loadErrorDetail"></small>
+    </div>
+  </main>
+
+  <!-- 하단 탭바 -->
+  <nav class="tabbar">
+    <button class="tab active" data-tab="home" onclick="goTab('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11h5v-6h4v6h5V9"/></svg>홈</button>
+    <button class="tab" data-tab="nav" onclick="goTab('nav')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>부위별 추천</button>
+    <button class="tab" data-tab="share" onclick="goTab('share')">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3.2 2.5-5.3 5.5-5.3s5.5 2.1 5.5 5.3"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 13.9c1.9.6 3 2.4 3 5.1"/></svg>스케줄 공유</button>
+    <button class="tab" data-tab="my" onclick="goTab('my')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>마이페이지</button>
+  </nav>
+
+  <!-- 계획표에 추가: 아래에서 올라오는 창 -->
+  <div class="sheet-dim" id="sheetDim" onclick="closeAddSheet()"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetName">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <img id="sheetThumb" alt="">
+      <div><small>내 계획표에 담기</small><b id="sheetName">기구 이름</b></div>
+    </div>
+    <div class="sheet-label">요일 선택</div>
+    <div class="day-pick" id="sheetDays"></div>
+    <div class="stepper" id="setsRow">
+      <span>세트 수</span>
+      <div><button onclick="stepVal('sets',-1)" aria-label="세트 줄이기">−</button><b id="setsVal">3세트</b><button onclick="stepVal('sets',1)" aria-label="세트 늘리기">+</button></div>
+    </div>
+    <div class="stepper" id="repsRow">
+      <span id="repsLabel">반복 횟수</span>
+      <div><button onclick="stepVal('reps',-1)" aria-label="줄이기">−</button><b id="repsVal">12회</b><button onclick="stepVal('reps',1)" aria-label="늘리기">+</button></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-line" id="sheetCancel" onclick="closeAddSheet()">취소</button>
+      <button class="btn btn-primary" id="sheetConfirm" onclick="confirmAdd()">계획표에 추가</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<!-- 불러오는 순서: 데이터 → 저장소 → 계정 → 계획표 → 스케줄 공유 → 화면 동작 -->
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/plan.js"></script>
+<script src="js/share.js"></script>
+<script src="js/app.js"></script>
+</body></html>
