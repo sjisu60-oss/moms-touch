@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>헬스 기구 사용법 안내 AI – 와이어프레임 (PRD ver0.1)</title>
+<style>
+  :root{
+    --g0:#ffffff; --g1:#f4f4f4; --g2:#e6e6e6; --g3:#cfcfcf;
+    --g4:#a8a8a8; --g5:#7a7a7a; --g6:#4d4d4d; --g7:#2b2b2b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+       background:var(--g2);color:var(--g7);padding:32px 20px 60px}
+  header.doc{max-width:1400px;margin:0 auto 28px}
+  header.doc h1{font-size:22px}
+  header.doc p{font-size:13px;color:var(--g5);margin-top:6px;line-height:1.6}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--g6)}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .sw{width:14px;height:14px;border:1.5px solid var(--g5);display:inline-block}
+  .legend .sw{flex-shrink:0;padding:0;width:14px}
+  .sw.in{background:var(--g0)} .sw.btn{background:var(--g6);border-color:var(--g6)}
+  .sw.res{background:var(--g1);border-style:dashed}
+
+  .grid{max-width:1400px;margin:0 auto;display:grid;
+        grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:36px 24px;justify-items:center}
+
+  /* 화면 라벨 */
+  .screen{display:flex;flex-direction:column;align-items:center}
+  .tag{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px}
+  .tag .id{background:var(--g7);color:#fff;padding:3px 8px;border-radius:4px;font-weight:700;font-family:monospace}
+  .tag .name{font-weight:700}
+  .tag .pri{font-size:11px;color:var(--g5);border:1px solid var(--g4);padding:1px 6px;border-radius:10px}
+
+  /* 폰 프레임 */
+  .phone{width:300px;height:620px;background:var(--g0);border:8px solid var(--g7);border-radius:32px;
+         overflow:hidden;display:flex;flex-direction:column;position:relative}
+  .status{height:22px;background:var(--g7);color:var(--g3);font-size:10px;display:flex;
+          justify-content:space-between;align-items:center;padding:0 14px}
+  .appbar{height:46px;border-bottom:1px solid var(--g3);display:flex;align-items:center;
+          padding:0 12px;gap:8px;font-size:14px;font-weight:700}
+  .appbar .back{width:24px;height:24px;border:1.5px solid var(--g5);border-radius:4px;
+          display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--g6)}
+  .scrid{margin-left:auto;font-size:9px;font-family:monospace;color:var(--g5);font-weight:400}
+  .body{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+
+  /* 요소 */
+  .label{font-size:11px;color:var(--g5);font-weight:700;letter-spacing:.3px}
+  .img{background:repeating-linear-gradient(45deg,var(--g2),var(--g2) 8px,var(--g1) 8px,var(--g1) 16px);
+       border:1.5px solid var(--g3);border-radius:8px;display:flex;align-items:center;justify-content:center;
+       color:var(--g5);font-size:11px}
+  .input{border:1.5px solid var(--g5);background:var(--g0);border-radius:6px;padding:10px;
+         font-size:12px;color:var(--g4)}
+  .btn{background:var(--g6);color:#fff;border:none;border-radius:6px;padding:12px;font-size:13px;
+       font-weight:700;text-align:center;width:100%}
+  .btn.sub{background:var(--g0);color:var(--g6);border:1.5px solid var(--g6)}
+  .btn.sm{padding:6px 10px;font-size:11px;width:auto}
+  .result{background:var(--g1);border:1.5px dashed var(--g4);border-radius:8px;padding:10px}
+  .result>.label{display:block;margin-bottom:8px}
+
+  .chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .chip{border:1.5px solid var(--g5);border-radius:8px;padding:14px 0;text-align:center;font-size:13px;
+        background:var(--g0);color:var(--g6)}
+  .chip.on{background:var(--g6);color:#fff;border-color:var(--g6)}
+  .chips.row{display:flex;overflow-x:auto;gap:6px}
+  .chips.row .chip{padding:6px 12px;font-size:11px;border-radius:14px;white-space:nowrap}
+
+  .card{background:var(--g0);border:1px solid var(--g3);border-radius:8px;padding:8px;display:flex;
+        gap:10px;align-items:center;margin-bottom:6px}
+  .card .img{width:46px;height:46px;flex-shrink:0;font-size:9px}
+  .card .t{font-size:12px;font-weight:700}
+  .card .s{font-size:10px;color:var(--g5);margin-top:2px}
+  .card .go{margin-left:auto;color:var(--g4);font-size:14px}
+
+  .sec{border-top:1px solid var(--g2);padding-top:10px}
+  .sec h4{font-size:12px;margin-bottom:6px}
+  .line{height:8px;background:var(--g2);border-radius:4px;margin:5px 0}
+  .line.w80{width:80%} .line.w60{width:60%} .line.w40{width:40%}
+  ol.steps{padding-left:16px;font-size:11px;color:var(--g6);line-height:1.8}
+  .warn{border:1.5px solid var(--g6);background:var(--g1);border-radius:6px;padding:8px;font-size:11px;line-height:1.6}
+  .kv{display:flex;gap:6px;flex-wrap:wrap}
+  .kv span{font-size:10px;background:var(--g2);padding:3px 8px;border-radius:10px;color:var(--g6)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:11px;background:var(--g0)}
+  table.t th,table.t td{border:1px solid var(--g3);padding:6px;text-align:center}
+  table.t th{background:var(--g2)}
+  .bar{height:10px;background:var(--g2);border-radius:5px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--g5)}
+  .barrow{display:grid;grid-template-columns:60px 1fr 30px;gap:6px;align-items:center;font-size:10px;margin:4px 0}
+
+  .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
+  .icon{width:64px;height:64px;border:2px solid var(--g4);border-radius:50%;display:flex;align-items:center;
+        justify-content:center;font-size:28px;color:var(--g4)}
+  .bottom{padding:12px 14px;border-top:1px solid var(--g3);display:flex;flex-direction:column;gap:8px}
+  .note{font-size:10px;color:var(--g5);line-height:1.5}
+  .anno{width:300px;margin-top:10px;font-size:11px;color:var(--g6);line-height:1.6;
+        background:var(--g0);border-left:3px solid var(--g5);padding:8px 10px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<header class="doc">
+  <h1>헬스 기구 사용법 안내 AI — 모바일 웹 와이어프레임</h1>
+  <p>기준 문서: PRD ver0.1 · 화면 8종(SCR-001 ~ SCR-009, SCR-007 없음) · 그레이톤 저충실도(Lo-fi) 와이어프레임</p>
+  <div class="legend">
+    <span><i class="sw in"></i>입력칸 / 선택 요소</span>
+    <span><i class="sw" style="background:#4d4d4d;border-color:#4d4d4d"></i>버튼</span>
+    <span><i class="sw res"></i>결과 영역</span>
+  </div>
+</header>
+
+<main class="grid">
+
+<!-- SCR-001 -->
+<section class="screen">
+  <div class="tag"><span class="id">SCR-001</span><span class="name">메인 화면</span><span class="pri">기본</span></div>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>▮▮▮ ◔</span></div>
+    <div class="appbar">헬스 기구 안내 AI<span class="scrid">SCR-001</span></div>
+    <div class="body">
+      <div class="img" style="height:170px">서비스 대표 이미지</div>
+      <div>
+        <div style="font-size:17px;font-weight:800;line-height:1.4">운동 부위만 고르면<br>맞는 기구를 알려드려요</div>
+        <div class="note" style="margin-top:6px">헬스 초보자를 위한 기구 추천 · 사용법 · 주의사항 안내</div>
+      </div>
+      <div class="result">
+        <span class="label">이용 순서</span>
+        <ol class="steps"><li>운동 부위 선택</li><li>추천 기구 확인</li><li>사용법·주의사항 확인</li></ol>
+      </div>
+    </div>
+    <div class="bottom">
+      <button class="btn">시작하기</button>
+      <button class="btn sub">전체 기구 목록 보기</button>
+    </div>
+  </div>
+  <div class="anno">[시작하기] → SCR-002<br>[전체 기구 목록 보기] → SCR-006</div>
+</section>
+
+<!-- SCR-002 -->
+<section class="screen">
+  <div class="tag"><span class="id">SCR-002</span><span class="name">운동 부위 선택</span><span class="pri">필수</span></div>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>▮▮▮ ◔</span></div>
+    <div class="appbar"><span class="back">←</span>운동 부위 선택<span class="scrid">SCR-002</span></div>
+    <div class="body">
+      <div style="font-size:15px;font-weight:800">오늘 어느 부위를<br>운동하고 싶나요?</div>
+      <span class="label">운동 부위 (1개 선택)</span>
+      <div class="chips">
+        <div class="chip on">가슴</div><div class="chip">등</div><div class="chip">어깨</div>
+        <div class="chip">하체</div><div class="chip">팔</div>
+      </div>
+      <div class="img" style="height:150px">선택 부위 인체 그림 (강조 표시)</div>
+      <div class="note">※ 선택하지 않고 버튼을 누르면 "운동 부위를 선택해 주세요" 안내가 표시됩니다.</div>
+    </div>
+    <div class="bottom">
+      <button class="btn">AI 기구 추천받기</button>
+    </div>
+  </div>
+  <div class="anno">부위 5종 단일 선택 → [AI 기구 추천받기] → SCR-003</div>
+</section>
+
+<!-- SCR-003 -->
+<section class="screen">
+  <div class="tag"><span class="id">SCR-003</span><span class="name">AI 추천 결과</span><span class="pri">필수</span></div>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>▮▮▮ ◔</span></div>
+    <div class="appbar"><span class="back">←</span>추천 결과<span class="scrid">SCR-003</span></div>
+    <div class="body">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div><span class="label">선택한 부위</span><div style="font-size:16px;font-weight:800">가슴</div></div>
+        <button class="btn sub sm">부위 변경</button>
+      </div>
+      <div class="result">
+        <span class="label">추천 기구 목록 (3)</span>
+        <div class="card"><div class="img">사진</div><div><div class="t">체스트 프레스</div><div class="s">대흉근 · 근력 강화</div></div><span class="go">›</span></div>
+        <div class="card"><div class="img">사진</div><div><div class="t">펙 덱 플라이</div><div class="s">대흉근 안쪽 · 고립 운동</div></div><span class="go">›</span></div>
+        <div class="card"><div class="img">사진</div><div><div class="t">케이블 크로스오버</div><div class="s">대흉근 · 근지구력</div></div><span class="go">›</span></div>
+      </div>
+      <div class="note">※ 추천 방식: 학습 모델 (기준선: 규칙 기반)</div>
+    </div>
+  </div>
+  <div class="anno">기구 카드 탭 → SCR-004<br>[부위 변경] → SCR-005 · 결과 0건이면 → SCR-009</div>
+</section>
+
+<!-- SCR-004 -->
+<section class="screen">
+  <div class="tag"><span class="id">SCR-004</span><span class="name">기구 상세 정보</span><span class="pri">필수</span></div>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>▮▮▮ ◔</span></div>
+    <div class="appbar"><span class="back">←</span>체스트 프레스<span class="scrid">SCR-004</span></div>
+    <div class="body">
+      <div class="img" style="height:130px;flex-shrink:0">기구 사진</div>
+      <div class="result">
+        <span class="label">주요 타깃 근육 · 운동 목적</span>
+        <div class="kv"><span>대흉근</span><span>삼두근</span><span>전면 삼각근</span><span>상체 미는 힘 강화</span></div>
+      </div>
+      <div class="sec"><h4>① 세팅 방법</h4><div class="line w80"></div><div class="line w60"></div></div>
+      <div class="sec"><h4>② 사용 순서</h4>
+        <ol class="steps"><li>등을 등받이에 붙이고 앉기</li><li>손잡이를 가슴 높이에서 잡기</li><li>천천히 밀고 천천히 돌아오기</li></ol></div>
+      <div class="sec"><h4>③ 주의사항</h4>
+        <div class="warn">⚠ 팔꿈치를 완전히 펴서 잠그지 않기<br>⚠ 무리한 중량 대신 가벼운 무게로 시작</div></div>
+      <div class="sec"><h4>참고 출처</h4><div class="line w60"></div></div>
+    </div>
+  </div>
+  <div class="anno">타깃 근육 · 운동 목적 · 세팅 · 사용 순서 · 주의사항 · 출처를 세로 스크롤로 표시</div>
+</section>
+
+<!-- SCR-005 -->
+<section class="screen">
+  <div class="tag"><span class="id">SCR-005</span><span class="name">운동 부위 변경</span><span class="pri">추가 고려</span></div>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>▮▮▮ ◔</span></div>
+    <div class="appbar"><span class="back">←</span>추천 결과<span class="scrid">SCR-005</span></div>
+    <div class="body">
+      <span class="label">부위를 바꿔서 다시 추천받기</span>
+      <div class="chips row">
+        <div class="chip">가슴</div><div class="chip on">등</div><div class="chip">어깨</div><div class="chip">하체</div><div class="chip">팔</div>
+      </div>
+      <button class="btn">다시 추천받기</button>
+      <div class="result">
+        <span class="label">새 추천 결과 — 등 (2)</span>
+        <div class="card"><div class="img">사진</div><div><div class="t">랫 풀다운</div><div class="s">광배근 · 등 넓이</div></div><span class="go">›</span></div>
+        <div class="card"><div class="img">사진</div><div><div class="t">시티드 로우</div><div class="s">광배근·능형근 · 등 두께</div></div><span class="go">›</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="anno">결과 화면을 떠나지 않고 상단 칩으로 부위 변경 → 같은 화면에서 재추천 (Should Have)</div>
+</section>
+
+<!-- SCR-006 -->
+<section class="screen">
+  <div class="tag"><span class="id">SCR-006</span><span class="name">전체 기구 목록</span><span class="pri">추가 고려</span></div>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>▮▮▮ ◔</span></div>
+    <div class="appbar"><span class="back">←</span>전체 기구 목록<span class="scrid">SCR-006</span></div>
+    <div class="body">
+      <div class="input">🔍 기구 이름 검색</div>
+      <div class="chips row">
+        <div class="chip on">전체</div><div class="chip">가슴</div><div class="chip">등</div><div class="chip">어깨</div><div class="chip">하체</div><div class="chip">팔</div>
+      </div>
+      <div class="result">
+        <span class="label">등록된 기구 (10)</span>
+        <div class="card"><div class="img">사진</div><div><div class="t">체스트 프레스</div><div class="s">가슴</div></div><span class="go">›</span></div>
+        <div class="card"><div class="img">사진</div><div><div class="t">랫 풀다운</div><div class="s">등</div></div><span class="go">›</span></div>
+        <div class="card"><div class="img">사진</div><div><div class="t">숄더 프레스</div><div class="s">어깨</div></div><span class="go">›</span></div>
+        <div class="card"><div class="img">사진</div><div><div class="t">레그 프레스</div><div class="s">하체</div></div><span class="go">›</span></div>
+        <div class="card"><div class="img">사진</div><div><div class="t">암 컬 머신</div><div class="s">팔</div></div><span class="go">›</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="anno">검색 입력칸 + 부위 필터 칩 · 항목 탭 → SCR-004</div>
+</section>
+
+<!-- SCR-008 -->
+<section class="screen">
+  <div class="tag"><span class="id">SCR-008</span><span class="name">모델 평가 결과</span><span class="pri">개발·시연용</span></div>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>▮▮▮ ◔</span></div>
+    <div class="appbar"><span class="back">←</span>모델 평가 결과<span class="scrid">SCR-008</span></div>
+    <div class="body">
+      <span class="label">평가 조건</span>
+      <div style="display:flex;gap:6px">
+        <div class="input" style="flex:1">K = 3 ▾</div>
+        <button class="btn sm">평가 실행</button>
+      </div>
+      <div class="result">
+        <span class="label">기준선 vs 학습 모델</span>
+        <table class="t">
+          <tr><th>지표</th><th>규칙 기반</th><th>학습 모델</th></tr>
+          <tr><td>Precision@K</td><td>0.00</td><td>0.00</td></tr>
+          <tr><td>Recall@K</td><td>0.00</td><td>0.00</td></tr>
+        </table>
+      </div>
+      <div class="result">
+        <span class="label">부위별 정확도</span>
+        <div class="barrow"><span>가슴</span><div class="bar"><i style="width:70%"></i></div><span>–</span></div>
+        <div class="barrow"><span>등</span><div class="bar"><i style="width:55%"></i></div><span>–</span></div>
+        <div class="barrow"><span>어깨</span><div class="bar"><i style="width:60%"></i></div><span>–</span></div>
+        <div class="barrow"><span>하체</span><div class="bar"><i style="width:80%"></i></div><span>–</span></div>
+        <div class="barrow"><span>팔</span><div class="bar"><i style="width:45%"></i></div><span>–</span></div>
+      </div>
+      <div class="result">
+        <span class="label">오추천 사례</span>
+        <div class="line w80"></div><div class="line w60"></div><div class="line w80"></div>
+      </div>
+    </div>
+  </div>
+  <div class="anno">수치는 자리표시(0.00) — 테스트 데이터 평가 후 채움</div>
+</section>
+
+<!-- SCR-009 -->
+<section class="screen">
+  <div class="tag"><span class="id">SCR-009</span><span class="name">오류 안내</span><span class="pri">예외 처리</span></div>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>▮▮▮ ◔</span></div>
+    <div class="appbar"><span class="back">←</span>안내<span class="scrid">SCR-009</span></div>
+    <div class="body">
+      <div class="center">
+        <div class="icon">!</div>
+        <div style="font-size:15px;font-weight:800">추천 결과가 없어요</div>
+        <div class="note">선택한 부위에 맞는 기구를 찾지 못했거나<br>데이터를 불러오지 못했습니다.</div>
+        <div class="result" style="width:100%;text-align:left">
+          <span class="label">오류 메시지 영역</span>
+          <div class="note">예) 데이터 조회 실패 (code: 000)</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <button class="btn">다시 시도</button>
+      <button class="btn sub">다른 부위 선택하기</button>
+    </div>
+  </div>
+  <div class="anno">[다시 시도] → 재요청 · [다른 부위 선택하기] → SCR-002</div>
+</section>
+
+</main>
+</body>
+</html>
