@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>헬스 기구 사용법 안내 AI</title>
+<style>
+:root{
+  --bg:#f2f2f2;--surface:#fff;--surface2:#e9e9e9;--line:#d7d7d7;
+  --text:#202020;--muted:#707070;--dark:#303030;--dark2:#4a4a4a;
+  --radius:18px;
+  /* iPhone 16 뷰포트: 393 × 852 pt */
+  --w:393px;--h:852px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif}
+button{font:inherit;cursor:pointer;color:inherit}
+
+/* 앱 영역: 실제 휴대폰에서는 화면 전체, PC에서는 아이폰 16 크기 프레임 */
+.app{width:100%;max-width:var(--w);min-height:100vh;margin:0 auto;background:#fafafa;position:relative;
+     padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+@media(min-width:600px){
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 0;flex-direction:column;gap:12px}
+  .device{width:calc(var(--w) + 24px);height:calc(var(--h) + 24px);background:#1e1e1e;border-radius:62px;padding:12px;
+          box-shadow:0 20px 50px rgba(0,0,0,.18);position:relative}
+  .device::before{content:"";position:absolute;top:23px;left:50%;transform:translateX(-50%);width:124px;height:36px;
+          background:#000;border-radius:20px;z-index:20}  /* 다이내믹 아일랜드 */
+  .app{width:var(--w);height:var(--h);min-height:0;border-radius:50px;overflow-y:auto;padding-top:54px;padding-bottom:34px;
+       scrollbar-width:none}
+  .app::-webkit-scrollbar{display:none}
+  .size-note{font-size:11px;color:#999}
+}
+@media(max-width:599px){.size-note{display:none}}
+
+.topbar{height:56px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+.brand{font-weight:800;letter-spacing:-.5px}.brand span{color:#888}
+.top-tag{font-size:11px;color:#666;background:#eee;padding:7px 10px;border-radius:20px}
+.screen{display:none;padding:22px 20px 30px;animation:fade .2s ease}
+.screen.active{display:block}
+@keyframes fade{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}
+h1{font-size:26px;line-height:1.3;letter-spacing:-1px;margin:0 0 10px}
+h2{font-size:20px;letter-spacing:-.6px;margin:0 0 8px}
+p{color:var(--muted);line-height:1.6;margin:0;font-size:14px}
+.hero{background:#e6e6e6;border-radius:24px;padding:24px 20px;margin:4px 0 20px;min-height:200px;display:flex;justify-content:space-between;gap:10px}
+.hero-label{font-size:12px;color:#666;font-weight:700;letter-spacing:.5px}
+.hero-title{font-size:27px;font-weight:800;line-height:1.3;letter-spacing:-1.2px;margin-top:8px}
+.hero-desc{font-size:12px;color:#555;margin-top:9px;line-height:1.5}
+.hero .fig{width:78px;flex:none;align-self:flex-end}
+.primary,.secondary,.ghost{border:0;border-radius:13px;padding:15px 18px;font-weight:700;transition:.15s}
+.primary{background:var(--dark);color:#fff;width:100%}
+.primary:hover{background:#111}
+.secondary{background:#e5e5e5;color:#222}
+.ghost{background:transparent;border:1px solid #cfcfcf;color:#444}
+.button-row{display:flex;gap:9px;margin-top:20px}
+.button-row>*{flex:1}
+.section-head{display:flex;align-items:end;justify-content:space-between;margin:24px 0 12px}
+.small{font-size:12px;color:#888}
+.steps{display:grid;gap:10px;margin-top:12px}
+.step{display:flex;gap:13px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px}
+.step-num{width:29px;height:29px;display:grid;place-items:center;background:#e7e7e7;border-radius:9px;font-size:12px;font-weight:800;flex:none}
+.step b{font-size:14px}.step span{font-size:12px;color:#888;display:block;margin-top:3px}
+
+/* 운동 부위 카드 + 인체 그림 */
+.part-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0}
+.part{border:1px solid #d3d3d3;background:#fff;border-radius:15px;padding:12px;display:flex;align-items:center;gap:10px;text-align:left;min-height:104px}
+.part:last-child{grid-column:1 / -1;justify-content:center}
+.part .fig{width:46px;flex:none}
+.part b{font-size:16px;display:block}
+.part small{font-size:11px;color:#888;display:block;margin-top:4px;line-height:1.4}
+.part.selected{background:#333;color:#fff;border-color:#333}
+.part.selected small{color:#bbb}
+
+.fig svg{width:100%;height:auto;display:block}
+.fig .b{fill:#d4d4d4}
+.fig .hl{fill:#3a3a3a}
+.fig .cap{font-size:8px;fill:#888;text-anchor:middle}
+.part.selected .fig .b{fill:#5a5a5a}
+.part.selected .fig .hl{fill:#fff}
+.part.selected .fig .cap{fill:#bbb}
+
+.helper{font-size:12px;color:#888;margin-top:4px}
+.result-summary{background:#e8e8e8;border-radius:16px;padding:16px;margin:16px 0;display:flex;gap:14px;align-items:center}
+.result-summary .fig{width:70px;flex:none}
+.result-summary b{font-size:15px}.result-summary p{font-size:13px;margin-top:5px}
+.preview{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;margin-top:14px;display:flex;gap:14px;align-items:center}
+.preview .fig{width:60px;flex:none}
+.preview p{font-size:13px}
+.machine{display:flex;align-items:center;gap:13px;padding:14px;border:1px solid var(--line);border-radius:15px;background:#fff;margin:10px 0}
+.machine-art{width:62px;height:62px;flex:none;border-radius:12px;background:linear-gradient(135deg,#eee,#d9d9d9);display:grid;place-items:center;color:#777;font-size:13px;font-weight:700}
+.machine-info{flex:1;min-width:0}.machine-info b{display:block;font-size:15px}.machine-info span{font-size:12px;color:#888;display:block;margin-top:5px}
+.empty{border:1px dashed #bbb;border-radius:15px;padding:24px 17px;text-align:center;background:#fff;margin-top:14px}
+.empty b{display:block;margin-bottom:7px}.empty p{font-size:13px}
+.detail-block{margin-top:18px}.detail-block h3{font-size:14px;margin:0 0 9px}
+.detail-placeholder{background:#fff;border:1px solid var(--line);border-radius:13px;padding:15px;font-size:13px;color:#777;line-height:1.6}
+.check-row{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid #eee;font-size:13px;color:#555}
+.check-row:last-child{border:0}
+.check-row input{accent-color:#333;margin-top:2px}
+select{width:100%;border:1px solid #ccc;border-radius:12px;background:#fff;padding:14px;font:inherit;color:#222}
+label.field-label{display:block;font-size:13px;font-weight:700;margin:18px 0 8px}
+.notice{font-size:12px;color:#777;background:#eee;padding:12px 14px;border-radius:12px;margin-top:15px;line-height:1.6}
+.footer{padding:20px;text-align:center;color:#999;font-size:11px;border-top:1px solid #eee;margin-top:10px}
+.back{border:0;background:none;color:#666;padding:0;margin-bottom:16px;font-size:13px}
+
+/* 내용이 짧아도 탭바가 화면 맨 아래에 붙도록 */
+.app{display:flex;flex-direction:column}
+.app>*{flex-shrink:0}
+.footer{margin-top:auto}
+
+/* 하단 탭바 */
+.tabbar{position:sticky;bottom:0;z-index:6;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);
+        border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);
+        padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+.tab{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:#9a9a9a;font-size:11px;font-weight:600}
+.tab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab.active{color:#222}
+.tab.active svg{stroke-width:2.2}
+@media(min-width:600px){.app{padding-bottom:0}.tabbar{padding-bottom:26px}}
+
+/* 마이페이지 */
+.profile{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:6px}
+.avatar{width:58px;height:58px;border-radius:50%;background:#e2e2e2;display:grid;place-items:center;color:#888;font-size:22px;flex:none}
+.profile b{font-size:16px;display:block}.profile span{font-size:12px;color:#888}
+.menu{background:#fff;border:1px solid var(--line);border-radius:15px;margin-top:12px;overflow:hidden}
+.menu-row{display:flex;justify-content:space-between;align-items:center;padding:15px;border-bottom:1px solid #eee;font-size:14px}
+.menu-row:last-child{border:0}
+button.menu-row{width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;color:#222}
+button.menu-row:active,.chip:active,.link-btn:active{opacity:.6}
+.link-btn{border:0;background:none;padding:0;font-size:12px;color:#888;text-decoration:underline;text-underline-offset:3px}
+.link-btn.on{color:#222;font-weight:700}
+.chips.editing .chip{border-style:dashed}
+.chips.editing .chip.on{border-style:solid}
+.switch{appearance:none;width:44px;height:26px;border-radius:13px;background:#d0d0d0;position:relative;cursor:pointer;transition:.2s;flex:none;margin:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.switch:checked{background:#333}.switch:checked::after{left:21px}
+.menu-row span{color:#aaa;font-size:12px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid #cfcfcf;background:#fff;border-radius:18px;padding:8px 13px;font-size:12px;color:#555}
+.chip.on{background:#333;color:#fff;border-color:#333}
+
+/* 검색 */
+.search-box{display:flex;gap:8px;margin-top:14px}
+.search-box input{flex:1;border:1px solid #ccc;border-radius:12px;background:#fff;padding:14px;font:inherit;color:#222;min-width:0}
+.search-box button{border:0;background:var(--dark);color:#fff;border-radius:12px;padding:0 16px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="device">
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">FIT GUIDE <span>AI</span></div>
+    <div class="top-tag">초보 운동 가이드</div>
+  </header>
+
+  <!-- 메인 화면 -->
+  <section class="screen active" id="scr001">
+    <div class="hero">
+      <div>
+        <div class="hero-label">헬스 기구 사용법 안내 AI</div>
+        <div class="hero-title">오늘 운동할<br>부위를<br>선택하세요.</div>
+        <div class="hero-desc">운동 부위에 맞는 기구와<br>기본 사용법을 확인할 수 있습니다.</div>
+      </div>
+      <div class="fig" data-fig="전체"></div>
+    </div>
+    <button class="primary" onclick="showScreen('scr002')">운동 시작하기 →</button>
+    <div class="section-head"><h2>이용 순서</h2><span class="small">3 STEPS</span></div>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><div><b>운동 부위 선택</b><span>가슴 · 등 · 어깨 · 하체 · 팔</span></div></div>
+      <div class="step"><div class="step-num">02</div><div><b>기구 추천 확인</b><span>선택한 부위와 관련된 기구 확인</span></div></div>
+      <div class="step"><div class="step-num">03</div><div><b>사용법 확인</b><span>타깃 근육, 사용 순서, 주의사항 확인</span></div></div>
+    </div>
+    <div class="notice">※ 추천 및 기구 정보는 등록된 데이터와 모델을 연결한 뒤 제공됩니다.</div>
+  </section>
+
+  <!-- 운동 부위 선택 -->
+  <section class="screen" id="scr002">
+    <button class="back" onclick="showScreen('scr001')">← 메인으로</button>
+    <h1>어느 부위를<br>운동할까요?</h1>
+    <p>원하는 운동 부위를 하나 선택해 주세요.</p>
+    <div class="part-grid" id="partGrid">
+      <button class="part" data-part="가슴" onclick="selectPart(this)"><div class="fig" data-fig="가슴"></div><div><b>가슴</b><small>대흉근</small></div></button>
+      <button class="part" data-part="등" onclick="selectPart(this)"><div class="fig" data-fig="등"></div><div><b>등</b><small>광배근 · 승모근</small></div></button>
+      <button class="part" data-part="어깨" onclick="selectPart(this)"><div class="fig" data-fig="어깨"></div><div><b>어깨</b><small>삼각근</small></div></button>
+      <button class="part" data-part="하체" onclick="selectPart(this)"><div class="fig" data-fig="하체"></div><div><b>하체</b><small>대퇴사두근 · 햄스트링</small></div></button>
+      <button class="part" data-part="팔" onclick="selectPart(this)"><div class="fig" data-fig="팔"></div><div><b>팔</b><small>이두근 · 삼두근</small></div></button>
+    </div>
+    <div class="helper" id="partHelp">선택한 부위: 없음</div>
+    <button class="primary" style="margin-top:18px" onclick="recommend()">추천 결과 보기 →</button>
+  </section>
+
+  <!-- AI 추천 결과 -->
+  <section class="screen" id="scr003">
+    <button class="back" onclick="showScreen('scr002')">← 부위 다시 선택</button>
+    <h1><span id="resultPart">선택 부위</span> 운동 기구</h1>
+    <p>선택한 운동 부위와 관련된 기구 추천 결과입니다.</p>
+    <div class="result-summary">
+      <div class="fig" id="resultFig"></div>
+      <div><b>추천 결과</b><p id="resultSummary">추천 결과가 여기에 표시됩니다.</p></div>
+    </div>
+    <div id="machineResults">
+      <div class="empty"><b>기구 데이터 연결 대기</b><p>기구 데이터와 추천 모델을 연결하면<br>관련 기구 목록이 여기에 표시됩니다.</p></div>
+    </div>
+    <div class="button-row">
+      <button class="ghost" onclick="showScreen('scr005')">부위 변경</button>
+      <button class="secondary" onclick="showScreen('scr006')">전체 기구 목록</button>
+    </div>
+  </section>
+
+  <!-- 기구 상세 정보 -->
+  <section class="screen" id="scr004">
+    <button class="back" onclick="showScreen('scr003')">← 추천 결과</button>
+    <h1 id="detailName">기구 상세 정보</h1>
+    <p>기구별 기본 정보와 사용 시 주의사항을 확인하세요.</p>
+    <div class="machine" style="margin-top:18px">
+      <div class="machine-art">FIT</div>
+      <div class="machine-info"><b id="detailNameSmall">기구명</b><span>기구 정보 영역</span></div>
+    </div>
+    <div class="detail-block"><h3>주요 타깃 근육</h3><div class="detail-placeholder" id="detailMuscle">등록된 주요 타깃 근육 정보가 표시됩니다.</div></div>
+    <div class="detail-block"><h3>운동 목적</h3><div class="detail-placeholder">등록된 운동 목적 정보가 표시됩니다.</div></div>
+    <div class="detail-block"><h3>세팅 방법</h3><div class="detail-placeholder">기구별 세팅 방법이 단계별로 표시됩니다.</div></div>
+    <div class="detail-block"><h3>사용 순서</h3><div class="detail-placeholder">
+      <div class="check-row"><input type="checkbox"> <span>사용 순서 1 — 데이터 등록 필요</span></div>
+      <div class="check-row"><input type="checkbox"> <span>사용 순서 2 — 데이터 등록 필요</span></div>
+      <div class="check-row"><input type="checkbox"> <span>사용 순서 3 — 데이터 등록 필요</span></div>
+    </div></div>
+    <div class="detail-block"><h3>주의사항</h3><div class="detail-placeholder">검증된 주의사항 및 참고 출처가 표시됩니다.</div></div>
+    <button class="primary" style="margin-top:22px" onclick="showScreen('scr003')">추천 결과로 돌아가기</button>
+  </section>
+
+  <!-- 운동 부위 변경 -->
+  <section class="screen" id="scr005">
+    <button class="back" onclick="showScreen('scr003')">← 추천 결과</button>
+    <h1>운동 부위 변경</h1>
+    <p>다른 운동 부위를 선택하고 새 추천 결과를 확인할 수 있습니다.</p>
+    <label class="field-label" for="changePart">변경할 운동 부위</label>
+    <select id="changePart" onchange="previewPart(this.value)">
+      <option value="">부위를 선택하세요</option><option>가슴</option><option>등</option><option>어깨</option><option>하체</option><option>팔</option>
+    </select>
+    <div class="preview">
+      <div class="fig" id="changeFig"></div>
+      <p id="changeText">부위를 선택하면 해당 부위가 그림에 표시됩니다.</p>
+    </div>
+    <button class="primary" style="margin-top:16px" onclick="changePart()">변경하고 추천받기</button>
+  </section>
+
+  <!-- 전체 기구 목록 -->
+  <section class="screen" id="scr006">
+    <button class="back" onclick="showScreen('scr003')">← 이전 화면</button>
+    <h1>전체 기구 목록</h1>
+    <p>서비스에 등록된 기구를 확인하는 영역입니다.</p>
+    <div class="empty"><b>등록된 기구 데이터가 없습니다.</b><p>기구 약 10종의 정보가 등록되면<br>목록이 여기에 표시됩니다.</p></div>
+  </section>
+
+  <!-- 오류 안내 -->
+  <section class="screen" id="scr009">
+    <div class="empty" style="margin-top:40px">
+      <div style="font-size:30px;margin-bottom:12px">!</div>
+      <h2 id="errorTitle">결과를 표시할 수 없습니다.</h2>
+      <p id="errorMessage">추천 결과가 없거나 데이터를 불러오지 못했습니다.</p>
+    </div>
+    <button class="primary" style="margin-top:20px" onclick="showScreen('scr002')">다시 선택하기</button>
+    <button class="ghost" style="width:100%;margin-top:9px" onclick="showScreen('scr001')">메인으로 이동</button>
+  </section>
+
+  <!-- 마이페이지 -->
+  <section class="screen" id="mypage">
+    <h1>마이페이지</h1>
+    <div class="profile">
+      <div class="avatar">👤</div>
+      <div><b>사용자 이름</b><span>헬스 초보 · 프로필 정보 영역</span></div>
+    </div>
+    <div class="section-head"><h2>관심 운동 부위</h2><button class="link-btn" id="editBtn" onclick="toggleEdit()">편집</button></div>
+    <div class="chips" id="favChips">
+      <button class="chip on" onclick="favChip(this)">가슴</button><button class="chip" onclick="favChip(this)">등</button><button class="chip" onclick="favChip(this)">어깨</button><button class="chip" onclick="favChip(this)">하체</button><button class="chip" onclick="favChip(this)">팔</button>
+    </div>
+    <div class="helper" id="favHelp">부위를 누르면 바로 기구 추천을 볼 수 있어요.</div>
+    <div class="section-head"><h2>최근 본 기구</h2><button class="link-btn" onclick="showScreen('recent')">전체보기</button></div>
+    <div class="empty" style="margin-top:0"><b>최근 본 기구가 없습니다.</b><p>기구 상세 정보를 확인하면<br>여기에 기록이 표시됩니다.</p></div>
+    <div class="menu">
+      <button class="menu-row" onclick="showScreen('saved')">저장한 기구<span>›</span></button>
+      <button class="menu-row" onclick="showScreen('guide')">이용 안내<span>›</span></button>
+      <button class="menu-row" onclick="showScreen('settings')">설정<span>›</span></button>
+    </div>
+  </section>
+
+  <!-- 마이페이지 > 최근 본 기구 -->
+  <section class="screen" id="recent">
+    <button class="back" onclick="showScreen('mypage')">← 마이페이지</button>
+    <h1>최근 본 기구</h1>
+    <p>상세 정보를 확인한 기구가 최신 순으로 표시됩니다.</p>
+    <div class="empty"><b>최근 본 기구가 없습니다.</b><p>기구 상세 정보를 확인하면<br>여기에 기록이 표시됩니다.</p></div>
+    <button class="primary" style="margin-top:18px" onclick="showScreen('scr002')">운동 부위 고르러 가기</button>
+  </section>
+
+  <!-- 마이페이지 > 저장한 기구 -->
+  <section class="screen" id="saved">
+    <button class="back" onclick="showScreen('mypage')">← 마이페이지</button>
+    <h1>저장한 기구</h1>
+    <p>자주 쓰는 기구를 저장해 두고 빠르게 확인하세요.</p>
+    <div class="empty"><b>저장한 기구가 없습니다.</b><p>기구 상세 화면에서 저장하면<br>여기에 모아서 볼 수 있어요.</p></div>
+    <button class="primary" style="margin-top:18px" onclick="showScreen('search')">기구 검색하러 가기</button>
+  </section>
+
+  <!-- 마이페이지 > 이용 안내 -->
+  <section class="screen" id="guide">
+    <button class="back" onclick="showScreen('mypage')">← 마이페이지</button>
+    <h1>이용 안내</h1>
+    <p>FIT GUIDE AI는 이렇게 사용해요.</p>
+    <div class="steps" style="margin-top:16px">
+      <div class="step"><div class="step-num">01</div><div><b>운동 부위 선택</b><span>가슴 · 등 · 어깨 · 하체 · 팔 중 하나를 고릅니다.</span></div></div>
+      <div class="step"><div class="step-num">02</div><div><b>기구 추천 확인</b><span>선택한 부위와 관련된 기구 목록을 봅니다.</span></div></div>
+      <div class="step"><div class="step-num">03</div><div><b>사용법 확인</b><span>타깃 근육, 사용 순서, 주의사항을 확인합니다.</span></div></div>
+    </div>
+    <div class="notice">※ 안내되는 사용법은 참고용입니다. 통증이 있거나 처음 쓰는 기구라면 트레이너에게 자세를 확인받으세요.</div>
+  </section>
+
+  <!-- 마이페이지 > 설정 -->
+  <section class="screen" id="settings">
+    <button class="back" onclick="showScreen('mypage')">← 마이페이지</button>
+    <h1>설정</h1>
+    <div class="menu">
+      <label class="menu-row">운동 알림 받기<input type="checkbox" class="switch"></label>
+      <label class="menu-row">주의사항 먼저 보기<input type="checkbox" class="switch" checked></label>
+      <div class="menu-row">글자 크기
+        <select style="width:auto;padding:8px 10px" onchange="document.getElementById('app').style.fontSize=this.value">
+          <option value="">기본</option><option value="1.08em">크게</option>
+        </select>
+      </div>
+      <div class="menu-row">버전 정보<span>0.1</span></div>
+    </div>
+  </section>
+
+  <!-- 검색 -->
+  <section class="screen" id="search">
+    <h1>기구 검색</h1>
+    <p>기구 이름이나 운동 부위로 찾아보세요.</p>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="예) 랫 풀다운, 레그 프레스">
+      <button onclick="doSearch()">검색</button>
+    </div>
+    <div class="chips" id="searchChips">
+      <button class="chip on" onclick="pickChip(this)">전체</button><button class="chip" onclick="pickChip(this)">가슴</button><button class="chip" onclick="pickChip(this)">등</button><button class="chip" onclick="pickChip(this)">어깨</button><button class="chip" onclick="pickChip(this)">하체</button><button class="chip" onclick="pickChip(this)">팔</button>
+    </div>
+    <div class="section-head"><h2>검색 결과</h2><span class="small" id="searchCount">0건</span></div>
+    <div class="empty" style="margin-top:0" id="searchResult"><b>검색어를 입력해 주세요.</b><p>기구 데이터가 등록되면<br>검색 결과가 여기에 표시됩니다.</p></div>
+  </section>
+
+  <footer class="footer">FIT GUIDE AI · 헬스 기구 사용법 안내</footer>
+
+  <!-- 하단 탭바 -->
+  <nav class="tabbar">
+    <button class="tab" data-tab="search" onclick="showScreen('search')">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>검색</button>
+    <button class="tab active" data-tab="scr001" onclick="showScreen('scr001')">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11h5v-6h4v6h5V9"/></svg>홈</button>
+    <button class="tab" data-tab="mypage" onclick="showScreen('mypage')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>마이페이지</button>
+  </nav>
+</div>
+</div>
+<div class="size-note">미리보기: iPhone 16 · 393 × 852</div>
+
+<script>
+/* ---------- 운동 부위 인체 그림 (SVG) ----------
+   부위마다 해당 근육 영역을 진하게 강조합니다.
+   '등'은 뒷모습, 나머지는 앞모습으로 그립니다. */
+function bodySVG(part){
+  const back = part==="등";
+  const c = k => (part===k || (part==="전체" && k!=="등")) ? "hl" : "b";
+  const arm = c("팔"), sh = c("어깨"), ch = c("가슴"), lg = c("하체");
+  const torso = back
+    ? `<path class="hl" d="M37 31 L63 31 L61 58 L56 72 L44 72 L39 58 Z"/>
+       <rect class="b" x="40" y="72" width="20" height="8" rx="3"/>`
+    : `<rect class="${ch}" x="37" y="31" width="12.5" height="15" rx="5"/>
+       <rect class="${ch}" x="50.5" y="31" width="12.5" height="15" rx="5"/>
+       <rect class="b" x="40" y="47" width="20" height="33" rx="5"/>`;
+  return `<svg viewBox="0 0 100 172" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${part} 부위 그림">
+    <circle class="b" cx="50" cy="13" r="9"/>
+    <rect class="b" x="45.5" y="21" width="9" height="8" rx="2"/>
+    ${torso}
+    <ellipse class="${sh}" cx="32" cy="34" rx="7" ry="6.5"/>
+    <ellipse class="${sh}" cx="68" cy="34" rx="7" ry="6.5"/>
+    <rect class="${arm}" x="24" y="40" width="9" height="24" rx="4.5"/>
+    <rect class="${arm}" x="67" y="40" width="9" height="24" rx="4.5"/>
+    <rect class="b" x="21.5" y="65" width="8" height="23" rx="4"/>
+    <rect class="b" x="70.5" y="65" width="8" height="23" rx="4"/>
+    <circle class="b" cx="25" cy="92" r="4"/><circle class="b" cx="75" cy="92" r="4"/>
+    <rect class="b" x="38" y="80" width="24" height="10" rx="4"/>
+    <rect class="${lg}" x="38" y="89" width="11" height="36" rx="5.5"/>
+    <rect class="${lg}" x="51" y="89" width="11" height="36" rx="5.5"/>
+    <rect class="${lg}" x="39" y="127" width="9" height="30" rx="4.5"/>
+    <rect class="${lg}" x="52" y="127" width="9" height="30" rx="4.5"/>
+    <text class="cap" x="50" y="169">${back ? "뒷모습" : "앞모습"}</text>
+  </svg>`;
+}
+function drawFigures(){
+  document.querySelectorAll("[data-fig]").forEach(el=>el.innerHTML=bodySVG(el.dataset.fig));
+  document.getElementById("resultFig").innerHTML=bodySVG("");
+  document.getElementById("changeFig").innerHTML=bodySVG("");
+}
+
+let selectedPart = "";
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  const target=document.getElementById(id);
+  if(target) target.classList.add("active");
+  // 탭 표시: 마이페이지·검색은 각 탭, 나머지 화면은 홈 탭
+  const myPages = ["mypage","recent","saved","guide","settings"];
+  const tab = myPages.includes(id) ? "mypage" : (id==="search" ? "search" : "scr001");
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===tab));
+  document.getElementById("app").scrollTo({top:0});
+  window.scrollTo({top:0});
+}
+function selectPart(button){
+  document.querySelectorAll(".part").forEach(b=>b.classList.remove("selected"));
+  button.classList.add("selected");
+  selectedPart=button.dataset.part;
+  document.getElementById("partHelp").textContent="선택한 부위: "+selectedPart;
+}
+function recommend(){
+  if(!selectedPart){
+    document.getElementById("errorTitle").textContent="운동 부위를 선택해 주세요.";
+    document.getElementById("errorMessage").textContent="추천 결과를 확인하려면 운동 부위 선택이 필요합니다.";
+    showScreen("scr009");return;
+  }
+  document.getElementById("resultPart").textContent=selectedPart;
+  document.getElementById("resultFig").innerHTML=bodySVG(selectedPart);
+  document.getElementById("resultSummary").textContent=selectedPart+" 관련 기구 추천 결과가 표시되는 영역입니다.";
+  showScreen("scr003");
+}
+function openDetail(name,muscle){
+  document.getElementById("detailName").textContent=name;
+  document.getElementById("detailNameSmall").textContent=name;
+  document.getElementById("detailMuscle").textContent=muscle || "등록된 주요 타깃 근육 정보가 표시됩니다.";
+  showScreen("scr004");
+}
+function previewPart(value){
+  document.getElementById("changeFig").innerHTML=bodySVG(value);
+  document.getElementById("changeText").textContent = value
+    ? value+" 부위로 변경합니다." : "부위를 선택하면 해당 부위가 그림에 표시됩니다.";
+}
+function changePart(){
+  const value=document.getElementById("changePart").value;
+  if(!value){
+    document.getElementById("errorTitle").textContent="운동 부위를 선택해 주세요.";
+    document.getElementById("errorMessage").textContent="변경할 운동 부위를 먼저 선택해 주세요.";
+    showScreen("scr009");return;
+  }
+  selectedPart=value;
+  document.querySelectorAll(".part").forEach(b=>b.classList.toggle("selected",b.dataset.part===value));
+  document.getElementById("partHelp").textContent="선택한 부위: "+value;
+  recommend();
+}
+function pickChip(btn){
+  btn.parentElement.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));
+  btn.classList.add("on");
+}
+/* 마이페이지: 관심 운동 부위
+   - 평소: 부위를 누르면 그 부위의 추천 결과로 이동
+   - 편집 모드: 부위를 눌러 관심 부위 선택/해제 (여러 개 가능) */
+let editing=false;
+function toggleEdit(){
+  editing=!editing;
+  const btn=document.getElementById("editBtn");
+  btn.textContent = editing ? "완료" : "편집";
+  btn.classList.toggle("on",editing);
+  document.getElementById("favChips").classList.toggle("editing",editing);
+  document.getElementById("favHelp").textContent = editing
+    ? "관심 있는 부위를 눌러 선택하거나 해제하세요."
+    : "부위를 누르면 바로 기구 추천을 볼 수 있어요.";
+}
+function favChip(btn){
+  if(editing){ btn.classList.toggle("on"); return; }
+  const part=btn.textContent;
+  selectedPart=part;
+  document.querySelectorAll(".part").forEach(b=>b.classList.toggle("selected",b.dataset.part===part));
+  document.getElementById("partHelp").textContent="선택한 부위: "+part;
+  recommend();
+}
+function doSearch(){
+  const q=document.getElementById("searchInput").value.trim();
+  const box=document.getElementById("searchResult");
+  box.innerHTML = q
+    ? `<b>'${q.replace(/</g,"&lt;")}' 검색 결과가 없습니다.</b><p>기구 데이터가 등록되면<br>검색 결과가 여기에 표시됩니다.</p>`
+    : `<b>검색어를 입력해 주세요.</b><p>기구 데이터가 등록되면<br>검색 결과가 여기에 표시됩니다.</p>`;
+}
+drawFigures();
+</script>
+</body></html>
